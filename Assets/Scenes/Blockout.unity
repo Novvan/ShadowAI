@@ -192,7 +192,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-60282
+  m_Name: pb_Mesh22704
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -1016,6 +1016,7 @@ GameObject:
   - component: {fileID: 1498402326}
   - component: {fileID: 1498402328}
   - component: {fileID: 1498402327}
+  - component: {fileID: 1498402329}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -1072,6 +1073,21 @@ NavMeshAgent:
   m_BaseOffset: 0.7
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1498402329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1498402325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0edc54fc569830f48a079220880edfe4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 5
+  maxAmmo: 10
+  _weapon: {fileID: 11400000, guid: 26892fb94c619f548937a52172e3bf95, type: 2}
 --- !u!1 &1688622661
 GameObject:
   m_ObjectHideFlags: 0
@@ -1085,7 +1101,7 @@ GameObject:
   - component: {fileID: 1688622664}
   - component: {fileID: 1688622663}
   - component: {fileID: 1688622662}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Nav
   m_TagString: Untagged
   m_Icon: {fileID: 0}

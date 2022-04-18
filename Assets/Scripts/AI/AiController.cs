@@ -33,9 +33,9 @@ namespace DeliverableIA.AI
 		private void Awake()
 		{
 			_enemy = GetComponent<Enemy>();
-			
+
 			_rateOfFire = _enemy.Weapon.fireRate;
-			
+
 			InitializeStateMachine();
 			InitializeDecisionTree();
 		}
@@ -77,7 +77,7 @@ namespace DeliverableIA.AI
 		{
 			_stateMachine = new StateMachine<AIStates>();
 			var idleState = new IdleState<AIStates>(_stateMachine);
-			var patrolState = new PatrolState<AIStates>(_stateMachine);
+			var patrolState = new PatrolState<AIStates>(_stateMachine, _enemy.waypoints, _enemy.MeshAgent);
 			var chaseState = new ChaseState<AIStates>(_stateMachine);
 			var attackState = new AttackState<AIStates>(_stateMachine, _rateOfFire);
 			var reloadState = new ReloadState<AIStates>(_stateMachine);
