@@ -1,9 +1,15 @@
-﻿namespace DeliverableIA.AI.FSM.AiStates
+﻿using DeliverableIA.Core.Interfaces;
+
+
+namespace DeliverableIA.AI.FSM.AiStates
 {
 	public class ReloadState<T> : State<T>
 	{
-		public ReloadState(StateMachine<T> fsm) : base(fsm)
+		private INode _root;
+
+		public ReloadState(StateMachine<T> fsm, INode root) : base(fsm)
 		{
+			_root = root;
 		}
 	}
 }

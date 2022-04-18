@@ -4,53 +4,38 @@ using UnityEngine.AI;
 
 namespace DeliverableIA.AI
 {
-	[RequireComponent(typeof(NavMeshAgent))]
-	public class Enemy : MonoBehaviour
-	{
-		#region Variables
+    [RequireComponent(typeof(NavMeshAgent))]
+    public class Enemy : MonoBehaviour
+    {
+        #region Variables
 
-		[SerializeField] private float speed = 1f;
-		[SerializeField] private int maxAmmo = 10;
-		[SerializeField] private Weapon weapon;
-		public Transform[] waypoints;
-		private int _currentAmmo;
-		private float _counter;
-		private NavMeshAgent _navMeshAgent;
+        [SerializeField] private float speed = 1f;
+        [SerializeField] private int maxAmmo = 10;
+        [SerializeField] private Weapon weapon;
+        public Transform[] waypoints;
+        private int _currentAmmo;
+        private NavMeshAgent _navMeshAgent;
 
-		public Weapon Weapon => weapon;
+        public Weapon Weapon => weapon;
 
-		public NavMeshAgent MeshAgent => _navMeshAgent;
+        public NavMeshAgent MeshAgent => _navMeshAgent;
 
-		#endregion
+        public int CurrentAmmo => _currentAmmo;
 
-		#region Unity Methods
+        #endregion
 
-		private void Start()
-		{
-			_currentAmmo = maxAmmo;
-			_navMeshAgent = GetComponent<NavMeshAgent>();
-		}
+        #region Unity Methods
 
-		private void Update()
-		{
-			_counter += Time.deltaTime;
-		}
+        private void Start()
+        {
+            _currentAmmo = maxAmmo;
+            _navMeshAgent = GetComponent<NavMeshAgent>();
+        }
 
-		#endregion
+        private void Update()
+        {
+        }
 
-		#region Custom Methods
-
-		public bool IsAmmoEmpty() => _currentAmmo > 0;
-		public bool IsLineOfSight() => true;
-		public bool IsInAttackRange() => false;
-
-		public bool IdleTimer()
-		{
-			var cnt = _counter;
-			_counter = 0;
-			return cnt >= 5;
-		}
-
-		#endregion
-	}
+        #endregion
+    }
 }
