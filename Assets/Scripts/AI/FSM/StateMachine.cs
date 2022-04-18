@@ -15,7 +15,7 @@ namespace DeliverableIA.AI.FSM
 			SetInit(initialState);
 		}
 
-		private void SetInit(IState<T> initialState)
+		public void SetInit(IState<T> initialState)
 		{
 			_currentState = initialState;
 			_currentState.Enter();

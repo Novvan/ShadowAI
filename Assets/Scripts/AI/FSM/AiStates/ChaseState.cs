@@ -2,7 +2,7 @@
 {
 	public class ChaseState<T> : State<T>
 	{
-		protected ChaseState(StateMachine<T> fsm) : base(fsm)
+		public ChaseState(StateMachine<T> fsm) : base(fsm)
 		{
 		}
 	}

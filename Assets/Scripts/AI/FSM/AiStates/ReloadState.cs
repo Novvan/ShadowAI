@@ -4,7 +4,6 @@
 	{
 		public ReloadState(StateMachine<T> fsm) : base(fsm)
 		{
-			
 		}
 	}
 }

@@ -18,14 +18,13 @@ namespace DeliverableIA.AI
 			Patrol,
 			Chase,
 			Attack,
-			Reload,
-			Dead
+			Reload
 		}
 
 		private StateMachine<AIStates> _stateMachine;
 		private INode _rootTreeNode;
 		private Enemy _enemy;
-		private float _counter;
+		private float _rateOfFire;
 
 		#endregion
 
@@ -34,14 +33,21 @@ namespace DeliverableIA.AI
 		private void Awake()
 		{
 			_enemy = GetComponent<Enemy>();
+			
+			_rateOfFire = _enemy.Weapon.fireRate;
+			
 			InitializeStateMachine();
 			InitializeDecisionTree();
 		}
 
+		private void Start()
+		{
+			_rootTreeNode.Execute();
+		}
+
 		private void Update()
 		{
-			_counter += Time.deltaTime;
-			_rootTreeNode.Execute();
+			_stateMachine.OnUpdate();
 		}
 
 		#endregion
@@ -51,27 +57,20 @@ namespace DeliverableIA.AI
 		private void InitializeDecisionTree()
 		{
 			//Action Nodes
-			var reloadActionNode = new ActionNode(() => { });
-			var attackActionNode = new ActionNode(() => { });
-			var chaseActionNode = new ActionNode(() => { });
-			var patrolActionNode = new ActionNode(() => { });
-			var idleActionNode = new ActionNode(() => { });
+			var transitionToReload = new ActionNode(() => _stateMachine.Transition(AIStates.Reload));
+			var transitionToAttack = new ActionNode(() => _stateMachine.Transition(AIStates.Attack));
+			var transitionToChase = new ActionNode(() => _stateMachine.Transition(AIStates.Chase));
+			var transitionToPatrol = new ActionNode(() => _stateMachine.Transition(AIStates.Patrol));
+			var transitionToIdle = new ActionNode(() => _stateMachine.Transition(AIStates.Idle));
 
 			//Question Nodes
-			var isDoneIdling = new QuestionNode(IdleTimer, patrolActionNode, idleActionNode);
-			var isInLineOfSight = new QuestionNode(() => _enemy.IsLineOfSight(), chaseActionNode, idleActionNode);
-			var isAmmoEmpty = new QuestionNode(() => _enemy.IsAmmoEmpty(), attackActionNode, reloadActionNode);
-			var isInAttackRange = new QuestionNode(() => _enemy.IsInAttackRange(), isAmmoEmpty, chaseActionNode);
+			var isDoneIdling = new QuestionNode(() => _enemy.IdleTimer(), transitionToPatrol, transitionToIdle);
+			var isInLineOfSight = new QuestionNode(() => _enemy.IsLineOfSight(), transitionToChase, transitionToIdle);
+			var isAmmoEmpty = new QuestionNode(() => _enemy.IsAmmoEmpty(), transitionToAttack, transitionToReload);
+			var isInAttackRange = new QuestionNode(() => _enemy.IsInAttackRange(), isAmmoEmpty, transitionToChase);
 
 			//Root Node
 			_rootTreeNode = isDoneIdling;
-		}
-
-		private bool IdleTimer()
-		{
-			var cnt = _counter;
-			_counter = 0;
-			return cnt >= 5;
 		}
 
 		private void InitializeStateMachine()
@@ -79,10 +78,29 @@ namespace DeliverableIA.AI
 			_stateMachine = new StateMachine<AIStates>();
 			var idleState = new IdleState<AIStates>(_stateMachine);
 			var patrolState = new PatrolState<AIStates>(_stateMachine);
-			// var chaseState = new ChaseState<AIStates>(_stateMachine);
-			// var attackState = new AttackState<AIStates>(_stateMachine,2.5f,);
+			var chaseState = new ChaseState<AIStates>(_stateMachine);
+			var attackState = new AttackState<AIStates>(_stateMachine, _rateOfFire);
 			var reloadState = new ReloadState<AIStates>(_stateMachine);
-			var deadState = new DeadState<AIStates>(_stateMachine, 5f, gameObject);
+
+			idleState.AddTransition(AIStates.Patrol, patrolState);
+			idleState.AddTransition(AIStates.Chase, chaseState);
+
+			patrolState.AddTransition(AIStates.Idle, idleState);
+			patrolState.AddTransition(AIStates.Chase, chaseState);
+
+			chaseState.AddTransition(AIStates.Idle, idleState);
+			chaseState.AddTransition(AIStates.Patrol, patrolState);
+			chaseState.AddTransition(AIStates.Attack, attackState);
+			chaseState.AddTransition(AIStates.Reload, reloadState);
+
+			attackState.AddTransition(AIStates.Reload, reloadState);
+			attackState.AddTransition(AIStates.Chase, chaseState);
+
+			reloadState.AddTransition(AIStates.Attack, attackState);
+			reloadState.AddTransition(AIStates.Chase, chaseState);
+
+
+			_stateMachine.SetInit(idleState);
 		}
 
 		#endregion

@@ -2,9 +2,9 @@
 
 namespace DeliverableIA.AI.FSM.AiStates
 {
-	public class AttackState<T> : CooldownState<T>
+	public class AttackState<T> : State<T>
 	{
-		protected AttackState(StateMachine<T> fsm, float time, INode root) : base(fsm, time, root)
+		public AttackState(StateMachine<T> fsm, float rateOfFire) : base(fsm)
 		{
 		}
 	}
