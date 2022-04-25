@@ -33,5 +33,10 @@ namespace DeliverableIA.AI.FSM
 			_currentState.Exit();
 			SetInit(newState);
 		}
+
+		public IState<T> GetCurrentState()
+		{
+			return _currentState;
+		}
 	}
 }

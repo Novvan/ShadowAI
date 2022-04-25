@@ -1,12 +1,13 @@
-using System;
 using UnityEngine;
 using Cinemachine;
+using DeliverableIA.Core.ScriptableObjects;
 using DeliverableIA.Core.Utils;
 using DeliverableIA.Imported_Assets.StarterAssets.InputSystem;
 using DeliverableIA.Imported_Assets.StarterAssets.ThirdPersonController.Scripts;
 
 namespace DeliverableIA.Core.Player
 {
+	[RequireComponent(typeof(Player))]
 	public class PlayerController : MonoBehaviour
 	{
 		#region Variables
@@ -14,19 +15,13 @@ namespace DeliverableIA.Core.Player
 		private StarterAssetsInputs _starterAssetsInputs;
 		private ThirdPersonController _thirdPersonController;
 		private Animator _animator;
+		private Player _player;
 
 		[Header("Camera")]
 		[SerializeField] private CinemachineVirtualCamera aimVirtualCamera;
 		[SerializeField] private float baseSensitivity = 1f, aimSensitivity = 0.5f;
 		[SerializeField] private LayerMask aimCollisionMask = new LayerMask();
-
-		[Header("Shooting")]
-		[SerializeField] private Transform pfGun;
-		[SerializeField] private Transform gunSocket;
-		[SerializeField] private Transform pfBullet;
-		private Transform spawnPoint;
 		
-
 		#endregion
 
 		#region Unity Methods
@@ -36,8 +31,9 @@ namespace DeliverableIA.Core.Player
 			_starterAssetsInputs = GetComponent<StarterAssetsInputs>();
 			_thirdPersonController = GetComponent<ThirdPersonController>();
 			_animator = GetComponent<Animator>();
+			_player = GetComponent<Player>();
 		}
-		
+
 		private void Update()
 		{
 			HandleAim();
@@ -49,48 +45,44 @@ namespace DeliverableIA.Core.Player
 
 		private void HandleAim()
 		{
-			
 			if (_starterAssetsInputs.aim)
 			{
 				aimVirtualCamera.gameObject.SetActive(true);
 				_thirdPersonController.SetCameraSensitivity(aimSensitivity);
 				_thirdPersonController.SetRotateOnMove(false);
+
 				
-				var gun = Instantiate(pfGun, gunSocket);
-
-				spawnPoint = gun.GetChild(3);
-
-				Vector3 mouseWorldPosition = Vector3.zero;
-				Vector2 screenCenterPoint = new Vector2(Screen.width / 2, Screen.height / 2);
-				Ray ray = Tools.Cam.ScreenPointToRay(screenCenterPoint);
+				var mouseWorldPosition = Vector3.zero;
+				var screenCenterPoint = new Vector2(Screen.width / 2, Screen.height / 2);
+				var ray = Tools.Cam.ScreenPointToRay(screenCenterPoint);
 				if (Physics.Raycast(ray, out RaycastHit hit, 999f, aimCollisionMask))
 				{
 					mouseWorldPosition = hit.point;
 				}
 
-				Vector3 worldAimTarget = mouseWorldPosition;
-				worldAimTarget.y = transform.position.y;
-				Vector3 aimDirection = (worldAimTarget - transform.position).normalized;
-				
-				_animator.SetLayerWeight(1,Mathf.Lerp(_animator.GetLayerWeight(1),1,Time.deltaTime * 10f));
-				
+				var worldAimTarget = mouseWorldPosition;
+				var pos = transform.position;
+				worldAimTarget.y = pos.y;
+				var aimDirection = (worldAimTarget - pos).normalized;
+
+				_animator.SetLayerWeight(1, Mathf.Lerp(_animator.GetLayerWeight(1), 1, Time.deltaTime * 10f));
+
 				transform.forward = Vector3.Lerp(transform.forward, aimDirection, Time.deltaTime * 20f);
 
 
 				if (_starterAssetsInputs.shoot)
 				{
-					Vector3 aimDir = (mouseWorldPosition - spawnPoint.position).normalized;
-					Instantiate(pfBullet, spawnPoint.position, Quaternion.LookRotation(aimDir, Vector3.up));
+					_player.Shoot(mouseWorldPosition);
 					_starterAssetsInputs.shoot = false;
+
 				}
 			}
 			else
 			{
 				aimVirtualCamera.gameObject.SetActive(false);
-				_animator.SetLayerWeight(1,Mathf.Lerp(_animator.GetLayerWeight(1),0,Time.deltaTime * 10f));
+				_animator.SetLayerWeight(1, Mathf.Lerp(_animator.GetLayerWeight(1), 0, Time.deltaTime * 10f));
 				_thirdPersonController.SetCameraSensitivity(baseSensitivity);
 				_thirdPersonController.SetRotateOnMove(true);
-				gunSocket.DeleteAllChildren();
 			}
 		}
 

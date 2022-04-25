@@ -1,77 +1,88 @@
 using System;
+using DeliverableIA.Core.Player;
 using UnityEngine;
 using DeliverableIA.Core.Utils;
 
 namespace DeliverableIA.Managers
 {
-    public class GameManager : MonoBehaviour
-    {
-        #region Variables
+	public class GameManager : MonoBehaviour
+	{
+		#region Variables
 
-        private static GameManager _instance;
-        private GameState _state = GameState.Menu;
-        
-        public static GameManager Instance => _instance;
+		private static GameManager _instance;
+		private GameState _state = GameState.Menu;
 
-        #endregion
+		public static GameManager Instance => _instance;
 
-        #region Unity Methods
+		#endregion
 
-        private void Awake()
-        {
-            if (Instance == null)
-            {
-                _instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-        }
+		#region Unity Methods
 
-        private void Start()
-        {
-            DontDestroyOnLoad(gameObject);
-        }
+		private void Awake()
+		{
+			if (Instance == null)
+			{
+				Player.OnPlayerDeath += PlayerDeath;
+				_instance = this;
+			}
+			else
+			{
+				Destroy(gameObject);
+			}
+		}
 
-        private void Update()
-        {
-            switch (_state)
-            {
-                case GameState.Menu:
-                    break;
-                case GameState.Play:
-                    Tools.ToggleCursor(false);
-                    break;
-                case GameState.Pause:
-                    break;
-                case GameState.Victory:
-                    break;
-                case GameState.Defeat:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+		private void Start()
+		{
+			DontDestroyOnLoad(gameObject);
+			Debug.Log("GameManager started");
+		}
 
-        #endregion
+		private void Update()
+		{
+			switch (_state)
+			{
+				case GameState.Menu:
+					break;
+				case GameState.Play:
+					Tools.ToggleCursor(false);
+					break;
+				case GameState.Pause:
+					break;
+				case GameState.Victory:
+					break;
+				case GameState.Defeat:
+					Tools.ToggleCursor(true);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
 
-        #region Custom Methods
+		#endregion
 
-        public void SetState(GameState state)
-        {
-            _state = state;
-        }
+		#region Custom Methods
 
-        #endregion
-    }
+		public void SetState(GameState state)
+		{
+			_state = state;
+		}
 
-    public enum GameState
-    {
-        Menu,
-        Play,
-        Pause,
-        Victory,
-        Defeat,
-    }
+
+		private void PlayerDeath()
+		{
+			SetState(GameState.Defeat);
+			Debug.Log("Player died");
+		}
+
+		#endregion
+	}
+
+	public enum GameState
+	{
+		Menu,
+		Play,
+		Pause,
+		Victory,
+		Defeat,
+	}
 }

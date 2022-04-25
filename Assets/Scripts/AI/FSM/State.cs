@@ -9,14 +9,18 @@ namespace DeliverableIA.AI.FSM
 		#region Variables
 
 		private readonly Dictionary<T, IState<T>> _transitions = new Dictionary<T, IState<T>>();
-		private readonly StateMachine<T> _fsm;
+		protected readonly Enemy EnemyEntity;
+		protected readonly INode Root;
 
 		#endregion
 
-		protected State(StateMachine<T> fsm)
+		protected State(Enemy enemy, INode root)
 		{
-			_fsm = fsm;
+			EnemyEntity = enemy;
+			Root = root;
 		}
+
+		#region Class Methods
 
 		public virtual void Enter()
 		{
@@ -29,6 +33,8 @@ namespace DeliverableIA.AI.FSM
 		public virtual void Exit()
 		{
 		}
+
+		#endregion
 
 		#region Utils
 
@@ -47,7 +53,8 @@ namespace DeliverableIA.AI.FSM
 
 		public IState<T> GetTransition(T key)
 		{
-			return _transitions[key];
+			var transition = _transitions.FirstOrDefault(t => t.Key.Equals(key));
+			return transition.Value;
 		}
 
 		#endregion

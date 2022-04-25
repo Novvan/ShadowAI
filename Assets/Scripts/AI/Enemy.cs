@@ -1,41 +1,95 @@
-using DeliverableIA.Core.ScriptableObjects.Scripts;
+using DeliverableIA.Core;
+using DeliverableIA.Core.Player;
+using DeliverableIA.Core.ScriptableObjects;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace DeliverableIA.AI
 {
-    [RequireComponent(typeof(NavMeshAgent))]
-    public class Enemy : MonoBehaviour
-    {
-        #region Variables
+	[SelectionBase]
+	[RequireComponent(typeof(NavMeshAgent))]
+	public class Enemy : Entity
+	{
+		#region Variables
 
-        [SerializeField] private float speed = 1f;
-        [SerializeField] private int maxAmmo = 10;
-        [SerializeField] private Weapon weapon;
-        public Transform[] waypoints;
-        private int _currentAmmo;
-        private NavMeshAgent _navMeshAgent;
+		[Header("Sight")]
+		public float sightAngle = 10f;
+		public float sightRange = 10f;
+		public LayerMask obstacleMask = new LayerMask(), playerMask = new LayerMask();
+		
+		[Space(5)]
+		[Header("State")]
+		public float idleTime;
+		public Transform[] waypoints;
 
-        public Weapon Weapon => weapon;
+		private NavMeshAgent _navMeshAgent;
 
-        public NavMeshAgent MeshAgent => _navMeshAgent;
+		public NavMeshAgent MeshAgent => _navMeshAgent;
 
-        public int CurrentAmmo => _currentAmmo;
+		public Weapon Weapon => weapon;
+		public int CurrentAmmunition => CurrentAmmo;
 
-        #endregion
+		#endregion
 
-        #region Unity Methods
+		#region Unity Methods
 
-        private void Start()
-        {
-            _currentAmmo = maxAmmo;
-            _navMeshAgent = GetComponent<NavMeshAgent>();
-        }
+		private void Awake()
+		{
+			_navMeshAgent = GetComponent<NavMeshAgent>();
+		}
 
-        private void Update()
-        {
-        }
+		#endregion
 
-        #endregion
-    }
+		#region Custom Methods
+
+		public Transform[] CheckTargets(float range)
+		{
+			var colliders = new Collider[10];
+			var numColliders = Physics.OverlapSphereNonAlloc(transform.position, range, colliders, playerMask);
+			var targets = new Transform[numColliders];
+			for (var i = 0; i < numColliders; i++)
+			{
+				targets[i] = colliders[i].transform;
+			}
+
+			return targets;
+		}
+
+
+		public bool IsInRange(Transform target, float range)
+		{
+			//Check if target is in range
+			var diff = target.position - transform.position;
+			var distance = diff.magnitude;
+			if (distance > range) return false;
+
+			//Check if target is inside angle of view
+			var angleToTarget = Vector3.Angle(diff, transform.forward);
+			if (angleToTarget > sightAngle / 2) return false;
+
+			//Check if target is visible
+			return !Physics.Raycast(transform.position, diff.normalized, distance, obstacleMask);
+		}
+
+		public void Reload()
+		{
+			if (TotalAmmo <= 0) return;
+			CurrentAmmo = weapon.magazineSize;
+			TotalAmmo -= weapon.magazineSize;
+		}
+
+		public void Chase(GameObject player)
+		{
+			_navMeshAgent.SetDestination(player.transform.position);
+		}
+
+		public void ResetNav()
+		{
+			_navMeshAgent.isStopped = true;
+			_navMeshAgent.ResetPath();
+			_navMeshAgent.isStopped = false;
+		}
+
+		#endregion
+	}
 }
